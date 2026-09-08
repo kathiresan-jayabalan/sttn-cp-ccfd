@@ -1,8 +1,37 @@
 cff-version: 1.2.0
 message: "If you use this program, please cite it as below."
 type: software
-title: "STTN-CP-CCFD: Transformer-Based Baseline for Credit Card Fraud Detection with Contrastive Pretraining"
+title: "STTN-CP-CCFD: Spatial-Temporal Transformer with Contrastive Pretraining for Credit Card Fraud Detection"
 version: 1.0.0
-date-released: 2026-09-07
+date-released: 2026-09-08
 license: Apache-2.0
-repository-code: "https://github.com/kathiresan-jayabalan/trans-fasnet-ccfd"
+repository-code: "https://github.com/kathiresan-jayabalan/sttn-cp-ccfd"
+
+authors:
+  - family-names: Jayabalan
+    given-names: Kathiresan
+    affiliation: "Research Scholar, Sathyabama Institute of Science and Technology, Chennai, Tamil Nadu, India"
+    email: kathiresan.jayabalan@gmail.com
+    orcid: "https://orcid.org/0009-0006-0902-772X"
+
+  - family-names: Radhakrishnan
+    given-names: Sethuraman
+    affiliation: "Associate Professor, Sathyabama Institute of Science and Technology, Chennai, Tamil Nadu, India"
+    email: sethuraman.cse@sathyabama.ac.in
+    orcid: "https://orcid.org/0000-0001-7115-593X"
+
+keywords:
+  - credit card fraud detection
+  - fraud detection
+  - deep learning
+  - spatial-temporal transformer
+  - transformers
+  - contrastive pretraining
+  - contrastive learning
+  - self-supervised learning
+  - financial machine learning
+  - imbalanced classification
+  - tabular data
+  - PyTorch
+
+abstract: "STTN-CP is a spatial-temporal Transformer network with contrastive pretraining for credit card fraud detection. The framework models spatial correlations among transaction features and temporal dependencies across transaction sequences using stacked spatial-temporal Transformer blocks with residual connections. Contrastive representation learning is used to improve feature discrimination, followed by binary fraud classification. The implementation supports Min-Max normalization, class-imbalance handling, sequence-based transaction processing, training, evaluation and reproducibility-oriented workflows."
