@@ -1,6 +1,6 @@
-# STTN-CP for Credit Card Fraud Detection (sttn-cp-ccfd)
+# STTN-CP for Credit Card Fraud Detection
 
-STTN-CP is a Spatial-Temporal Transformer Network with Contrastive Pretraining for credit card fraud detection. The work combines spatial correlations among transaction features, temporal dependencies across transaction sequences, residual Transformer blocks, and contrastive representation learning for fraud classification. The repository provides the model implementation, data preparation, training and evaluation workflow, unit tests, result artifacts, and a Jupyter notebook.
+STTN-CP is a Spatial-Temporal Transformer Network with Contrastive Pretraining for credit card fraud detection. The implementation models relationships among transaction features with spatial self-attention and sequential dependencies across transaction windows with temporal self-attention.
 
 - **Authors:** Kathiresan Jayabalan, Sethuraman Radhakrishnan
 
@@ -12,163 +12,152 @@ The architecture uses stacked spatial-temporal Transformer blocks, followed by c
 
 ## Model Architecture
 
-Formulates the input to each spatial-temporal block as a three-dimensional tensor:
+The model represents each input as a transaction window with shape `(B, T, D)`, where `B` is the batch size, `T` is the sequence length, and `D` is the number of transaction features.
 
-$$
-M_l^{sp} \in \mathbb{R}^{A \times T \times d_f}
-$$
-
-where $A$ denotes the batch dimension, $T$ is the number of transaction time steps, and $d_f$ is the number of transaction features. The dataset used in the study contains 30 transaction attributes: `V1`-`V28`, `Time`, and `Amount`, with `Class` used as the target label.
-
-Each spatial-temporal block applies the **Spatial Transformer** and **Temporal Transformer** in sequence. The Spatial Transformer captures inter-feature dependencies across transaction attributes. Its output is combined with the block input through a residual connection. The resulting representation is then processed by the Temporal Transformer to capture dependencies across consecutive transactions, followed by a second residual connection.
-
-After the stacked spatial-temporal blocks, the resulting high-level embeddings are aggregated and passed to the contrastive pretraining module. The learned encoder representation is then used by a fully connected binary classification head with sigmoid activation.
-
-The repository implementation uses 8-step transaction windows for its configurable sequence input and 30 transaction features for the Kaggle dataset.
-
-```
-input tensor (A, T, d_f)
+```text
+input transaction window (B, T, D)
             │
+            ▼
      input embedding
             │
-    positional encoding
+            ▼
+     positional encoding
             │
-    ┌───────▼────────┐
-    │   ST Block l   │
-    │                │
-    │ Spatial        │
-    │ Transformer    │
-    │ inter-feature  │
-    │ dependencies   │
-    │       ↓        │
-    │   residual     │
-    │       ↓        │
-    │ Temporal       │
-    │ Transformer    │
-    │ sequential     │
-    │ dependencies   │
-    │       ↓        │
-    │   residual     │
-    └───────┬────────┘
+            ▼
+       ┌─────────────┐
+       │   ST Block  │
+       │             │
+       │   Spatial   │  attention across transaction features
+       │      │      │
+       │   residual  │
+       │      │      │
+       │   Temporal  │  attention across transaction timesteps
+       │      │      │
+       │   residual  │
+       └─────────────┘
             │
-           ⋮
+          repeat
             │
-    ┌───────▼────────┐
-    │   ST Block L   │
-    └───────┬────────┘
+            ▼
+    stacked ST blocks
             │
-       aggregation
+            ▼
+     mean aggregation
             │
-   spatial-temporal
-      representation
-            │
-   contrastive pretraining
-            │
-      learned embedding
-            │
-     fully connected
-     classification head
-            │
-      sigmoid output
-            │
-      legitimate / fraud
+       ┌────┴─────┐
+       │          │
+       ▼          ▼
+ contrastive   classifier
+ projection      head
+       │          │
+       ▼          ▼
+    InfoNCE    class logits
+       │          │
+       └────┬─────┘
+            ▼
+ L = L_classification + λ L_contrastive
 ```
+
+The sequential block structure is spatial attention → residual addition → temporal attention → residual addition. Spatial attention operates over the original transaction features at each timestep, while temporal attention operates over the embedded transaction sequence.
 
 ## Architecture Components
 
-- **Input Embedding:** Transforms transaction features into a continuous high-dimensional representation suitable for Transformer processing.
-- **Positional Encoding:** Adds sequence-order information so that temporal relationships can be modeled across transactions.
-- **Spatial Transformer:** Applies self-attention across transaction features to capture inter-feature dependencies.
-- **Temporal Transformer:** Applies self-attention across consecutive transactions to capture temporal and behavioral dependencies.
-- **Residual Connections:** Combine the Transformer outputs with their corresponding inputs to support stable gradient flow.
-- **Layer Normalization:** Normalizes intermediate Transformer representations and supports stable training.
-- **Representation Aggregation:** Aggregates the high-level spatial-temporal embeddings before the contrastive and classification stages.
-- **Contrastive Pretraining Module:** Uses augmented transaction samples and cosine-similarity-based InfoNCE learning to improve feature discrimination.
-- **Classifier Head:** Uses a fully connected layer with sigmoid activation for binary fraud classification.
-- **Combined Objective:** Defines the final objective as the sum of the classification and contrastive losses:
+- **Input Embedding:** Maps the transaction feature vector into the Transformer embedding space.
+- **Positional Encoding:** Adds sequence-order information for temporal modeling.
+- **Spatial Transformer:** Applies multi-head self-attention across transaction features at each timestep.
+- **Temporal Transformer:** Applies multi-head self-attention across consecutive transactions in a window.
+- **Residual Connections:** Preserve the incoming representation around the spatial and temporal transformations.
+- **Layer Normalization:** Stabilizes intermediate Transformer representations.
+- **Representation Aggregation:** Mean pooling across the transaction window produces a fixed-size sequence representation.
+- **Contrastive Projection Head:** Projects the aggregated representation into the contrastive space for InfoNCE learning between augmented views.
+- **Classifier Head:** Produces two class logits for legitimate and fraudulent transactions.
+- **Combined Objective:**
 
 $$
-L_{\mathrm{total}} = L_{\mathrm{classification}} + \lambda L_{\mathrm{contrastive}}
+L_{\mathrm{total}}
+=
+L_{\mathrm{classification}}
++
+\lambda L_{\mathrm{contrastive}}
 $$
 
-where $\lambda$ controls the contribution of the contrastive learning objective.
+where `λ` controls the contribution of the contrastive objective.
 
-## Model Hyperparameters
+## Model Configuration
 
-| Component | Value |
+The maintained implementation uses the following defaults:
+
+| Component | Default |
 |---|---:|
-| Train/test split | 80% / 20% |
+| Window length | 8 transactions |
+| Input features | 30 |
+| ST blocks | 3 |
+| Embedding width | 128 |
+| Attention heads | 4 |
+| Feed-forward width | 256 |
+| Contrastive projection | 64 |
+| InfoNCE temperature | 0.07 |
+| λ | 0.5 |
 | Batch size | 128 |
 | Optimizer | Adam |
 | Learning rate | 0.001 |
 | Training limit | 50 epochs |
-| Early stopping | Used |
-| InfoNCE temperature | 0.07 |
-| Preprocessing | Min-Max normalization + SMOTE |
+| Early stopping | Validation F1 |
 
-The implementation uses an InfoNCE contrastive stage with a temperature coefficient of 0.07, followed by supervised binary classification using a sigmoid classification head.
+The current implementation also uses a cosine-annealing learning-rate scheduler and weighted cross-entropy for class imbalance. These are implementation choices in the maintained repository and are separate from the archived original experiment configuration.
 
-The repository implementation additionally exposes configurable architecture defaults of 8 transaction steps, 30 input features, 3 stacked ST blocks, embedding width 128, 4 attention heads, feed-forward width 256, contrastive projection dimension 64, and an implementation-level contrastive weight of $\lambda=0.5$.
+## Dataset
 
-## Data
+The project uses the Kaggle Credit Card Fraud Detection dataset.
 
-The project uses the Kaggle Credit Card Fraud Detection dataset. The dataset contains 284,807 transactions from European cardholders during September 2013, including 492 fraudulent transactions and 284,315 legitimate transactions. The transaction attributes consist of 28 anonymized PCA components (`V1`–`V28`), `Time`, and `Amount`; `Class` is the binary target label.
-
-The reference configuration uses Min-Max normalization followed by SMOTE to address class imbalance, with an 80/20 train/test split.
-
-- Source: https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
-- File name: `creditcard.csv`
-- Target column: `Class`
-- Feature columns: `Time`, `V1`–`V28`, `Amount`
+- Source: `https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud`
+- File: `creditcard.csv`
+- Target: `Class`
+- Feature columns: `Time`, `V1`-`V28`, `Amount`
 - Number of input features: 30
+- Transactions: 284,807
+- Fraudulent transactions: 492
+- Legitimate transactions: 284,315
 
-Download the dataset and place it at `data/creditcard.csv`.
+Place the dataset at:
 
-## Repository protocol
+```text
+ data/creditcard.csv
+```
 
-The reference configuration uses an 80% training and 20% testing split with Min-Max normalization and SMOTE.
+## Repository Protocol
 
-The repository also contains an implementation-oriented workflow for validation and checkpoint handling:
-
-- **Repository split:** Transactions are divided into chronological 70% training, 10% validation, and 20% test partitions.
-- **Repository scaling:** `MinMaxScaler` is fitted on the training partition and applied to validation and test data.
-- **Repository class balancing:** `BorderlineSMOTE` is applied only to the training partition.
-- **Repository sequence construction:** Fixed-length windows are constructed within each partition so that a sequence does not cross a partition boundary.
-- **Sequence labels:** For supervised sequence classification, the final transaction in a window supplies the sequence label.
-
-## Running the experiments
-
-The repository training workflow uses its implementation-oriented protocol described above:
+The maintained repository uses a leakage-safe, implementation-oriented workflow:
 
 ```text
 sort transactions by Time
-    ↓
+        ↓
 70% train | 10% validation | 20% test
-    ↓
-fit Min-Max scaler on training partition
-    ↓
-transform validation/test using training scaler
-    ↓
-build 8-step windows independently
-    ↓
-apply BorderlineSMOTE to training partition
-    ↓
-train spatial-temporal Transformer
-    ↓
-contrastive + classification optimization
-    ↓
+        ↓
+fit Min-Max scaler on training partition only
+        ↓
+transform validation/test with training scaler
+        ↓
+build 8-step windows independently within each partition
+        ↓
+weighted classification + contrastive optimization
+        ↓
 select checkpoint using validation F1
-    ↓
+        ↓
 evaluate on held-out test partition
 ```
 
-Install the required dependencies:
+No sequence crosses a partition boundary. The label of a supervised sequence is the class of its final transaction.
+
+The repository protocol is intentionally documented separately from the archived original experiment. The archived original experiment used an 80/20 train/test configuration with SMOTE. The maintained repository uses chronological validation and test partitions together with its own class-imbalance handling.
+
+## Installation
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Train the model:
+## Training
 
 ```bash
 python -m src.train \
@@ -176,7 +165,14 @@ python -m src.train \
   --output-dir outputs
 ```
 
-Evaluate the trained model:
+Training writes:
+
+```text
+outputs/best_model.pt
+outputs/training_summary.json
+```
+
+## Evaluation
 
 ```bash
 python -m src.evaluate \
@@ -185,15 +181,21 @@ python -m src.evaluate \
   --output outputs/test_metrics.json
 ```
 
+Evaluation writes accuracy, precision, recall, F1, average precision, ROC-AUC, specificity, and a 2×2 confusion matrix.
+
 ## Tests
 
-The test suite checks the structural and data-processing properties that are important to the STTN-CP implementation:
+The test suite verifies the software contracts that matter for the implementation:
 
 - spatial attention receives exactly the original feature count as its token sequence;
-- classification requires the complete `(B, T, D)` window;
-- the final row in each window supplies its label;
-- windows are partition-local and do not cross train/validation/test boundaries;
-- InfoNCE rejects an invalid one-sample batch.
+- classification requires a complete `(B, T, D)` transaction window;
+- the final transaction in a window supplies its label;
+- sequence windows remain within their source partition;
+- chronological train/validation/test split sizes and ordering are preserved;
+- InfoNCE rejects invalid one-sample batches;
+- InfoNCE returns a finite scalar loss for valid inputs;
+- the model supports multiple stacked ST blocks;
+- the complete train → checkpoint → evaluate workflow runs successfully on a synthetic dataset.
 
 Run the tests with:
 
@@ -203,19 +205,15 @@ python -m pytest -q
 
 Continuous integration is configured under:
 
-```bash
+```text
 .github/workflows/tests.yml
 ```
 
-The workflow runs the unit tests and an end-to-end training smoke test on every push to `main` and on pull requests targeting `main`.
-
-## Output
-
-Training writes `outputs/best_model.pt` and `outputs/training_summary.json`. Evaluation writes `outputs/test_metrics.json`. The evaluation output includes accuracy, precision, recall, F1-score, ROC-AUC, average precision, specificity, and the confusion matrix for the fraud class.
+The CI workflow runs the test suite and the end-to-end training/evaluation smoke test.
 
 ## Results
 
-Experiments results report the following test-set performance:
+The archived original experiment reports the following testing performance:
 
 | Metric | Value |
 |---|---:|
@@ -225,9 +223,7 @@ Experiments results report the following test-set performance:
 | F1 | 98.92% |
 | Specificity | 97.96% |
 
-These values are the testing-performance values from the experiments and validations. 
-
-Statistical analysis reports the following mean ± standard deviation values:
+The associated statistical summary is:
 
 | Metric | Mean ± STD |
 |---|---:|
@@ -237,25 +233,30 @@ Statistical analysis reports the following mean ± standard deviation values:
 | F1 | 98.96 ± 0.06% |
 | Specificity | 98.24 ± 0.40% |
 
-The ablation study reports the effect of the individual components and the full STTN-CP configuration:
+The experiment record is preserved under:
 
-| Configuration | Accuracy | Precision | Recall | F1 | Specificity |
-|---|---:|---:|---:|---:|---:|
-| Spatial Transformer only | 97.25% | 97.06% | 96.85% | 96.94% | 95.80% |
-| Temporal Transformer only | 97.10% | 96.88% | 96.52% | 96.70% | 95.60% |
-| Spatial + Temporal Transformer without Contrastive Pretraining | 98.46% | 98.21% | 97.98% | 98.09% | 96.90% |
-| Spatial + Temporal Transformer + Pretraining without SMOTE | 98.03% | 97.84% | 97.60% | 97.72% | 96.50% |
-| **This STTN-CP model** | **99.12%** | **99.00%** | **98.86%** | **98.92%** | **97.96%** |
+```text
+results/original_run/
+├── run_log.txt
+├── training_summary.json
+└── test_metrics.json
+```
 
-## Status
+These files describe the original experiment record. They are kept separate from `outputs/`, which contains artifacts generated by the maintained open-source implementation.
+
+## Related Implementations
+
+The repositories below address the same credit-card-fraud-detection problem from different architectural directions:
 
 [kathiresan-jayabalan/trans-fasnet-ccfd](https://github.com/kathiresan-jayabalan/trans-fasnet-ccfd) is a baseline implementation. [kathiresan-jayabalan/sttn-cp-ccfd](https://github.com/kathiresan-jayabalan/sttn-cp-ccfd) implements the STTN-CP design with sequential spatial-temporal Transformer blocks, residual connections, and contrastive representation learning. Within each ST block, spatial attention models relationships among transaction features, followed by temporal attention across consecutive transactions. STTN-CP uses the sequential spatial-temporal design, while [kathiresan-jayabalan/c-sten-ccfd](https://github.com/kathiresan-jayabalan/c-sten-ccfd) develops a later architecture using parallel spatial and temporal branches with gated fusion.
 
 ## Publication
 
-**Paper:** STTN-CP: A Spatial-Temporal Transformer with Contrastive Pretraining Model for Credit Card Fraud Detection
+**Paper:** STTN-CP: A Spatial-Temporal Transformer with Contrastive Pretraining Model for Credit Card Fraud Detection  
+**Authors:** Kathiresan Jayabalan, Sethuraman Radhakrishnan  
+**Journal:** *Journal of Theoretical and Applied Information Technology*, Vol. 104, No. 7, 15 April 2026, pp. 305–324  
+**DOI:** `10.5281/zenodo.19593993`
 
-- **Authors:** Kathiresan Jayabalan, Sethuraman Radhakrishnan
-- **Journal:** *Journal of Theoretical and Applied Information Technology (JATIT)*, Vol. 104, No. 7, 15 April 2026, pp. 305–324
-- **Indexing:** [Scopus-indexed](https://www.scopus.com/sourceid/19700182903) | [SCImago Journal Rank (SJR)](https://www.scimagojr.com/journalsearch.php?q=19700182903&tip=sid)
-- **DOI:** [10.5281/zenodo.19593993](https://doi.org/10.5281/zenodo.19593993)
+## Citation
+
+See [`CITATION.cff`](CITATION.cff) for software and publication citation metadata.
