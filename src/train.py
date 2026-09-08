@@ -1,4 +1,4 @@
-"""Train STTN-CP on the chronological, partition-safe protocol."""
+"""Train STTN-CP on leakage-safe chronological protocol"""
 
 from __future__ import annotations
 
@@ -114,6 +114,7 @@ def train(args: argparse.Namespace) -> Dict[str, object]:
         total_meter = []
         class_meter = []
         contrast_meter = []
+
         for xb, yb in train_loader:
             xb, yb = xb.to(device), yb.to(device)
             view1 = augment(xb, args.noise_std)
@@ -121,6 +122,7 @@ def train(args: argparse.Namespace) -> Dict[str, object]:
             z1 = model.project(model.forward_backbone(view1))
             z2 = model.project(model.forward_backbone(view2))
             logits = model(xb)
+
             loss, class_loss_value, contrast_loss_value = combined_loss(
                 logits,
                 yb,
@@ -130,10 +132,12 @@ def train(args: argparse.Namespace) -> Dict[str, object]:
                 lambda_contrastive=args.lambda_contrastive,
                 temperature=args.temperature,
             )
+
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
+
             total_meter.append(loss.item())
             class_meter.append(class_loss_value.item())
             contrast_meter.append(contrast_loss_value.item())
@@ -164,6 +168,7 @@ def train(args: argparse.Namespace) -> Dict[str, object]:
 
     if best_state is None:
         raise RuntimeError("training did not produce a checkpoint")
+
     model.load_state_dict(best_state)
     test_metrics = predict_and_score(model, test_loader, device)
 
@@ -176,6 +181,7 @@ def train(args: argparse.Namespace) -> Dict[str, object]:
         "seed": args.seed,
     }
     torch.save(checkpoint, output_dir / "best_model.pt")
+
     summary = {
         "protocol": "chronological_70_10_20_train_only_scaling",
         "dataset_rows": len(df),
@@ -186,17 +192,10 @@ def train(args: argparse.Namespace) -> Dict[str, object]:
         "test_windows": len(X_test_w),
         "trainable_parameters": count_trainable_parameters(model),
         "device": str(device),
+        "seed": args.seed,
         "best_validation_f1": best_val_f1,
         "test_metrics": test_metrics,
         "history": history,
-        "paper_reference_metrics": {
-            "accuracy": 0.9912,
-            "precision": 0.9900,
-            "recall": 0.9886,
-            "f1": 0.9892,
-            "specificity": 0.9796,
-        },
-        "note": "Paper values are references from Table 4, not claims of reproduction.",
     }
     (output_dir / "training_summary.json").write_text(
         json.dumps(summary, indent=2), encoding="utf-8"
@@ -225,12 +224,15 @@ def predict_and_score(model: STTNCP, loader, device) -> Dict[str, object]:
             y_true.append(yb.numpy())
             y_pred.append(preds.cpu().numpy())
             y_prob.append(probs.cpu().numpy())
+
     y_true = np.concatenate(y_true)
     y_pred = np.concatenate(y_pred)
     y_prob = np.concatenate(y_prob)
+
     cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
     tn, fp, fn, tp = cm.ravel()
     specificity = tn / (tn + fp) if tn + fp else 0.0
+
     return {
         "accuracy": float(accuracy_score(y_true, y_pred)),
         "precision": float(precision_score(y_true, y_pred, zero_division=0)),
@@ -249,8 +251,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", default="outputs")
     parser.add_argument("--seed", type=int, default=42)
     for name, value in DEFAULTS.items():
-        arg = f"--{name.replace('_', '-')}"
-        parser.add_argument(arg, type=type(value), default=value)
+        parser.add_argument(f"--{name.replace('_', '-')}", type=type(value), default=value)
     return parser.parse_args()
 
 
