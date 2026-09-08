@@ -3,7 +3,6 @@ import pandas as pd
 
 from src.data import build_labeled_windows, chronological_split
 
-
 def test_labeled_windows_use_final_transaction_label():
     X = np.arange(20, dtype=np.float32).reshape(5, 4)
     y = np.array([0, 1, 0, 1, 1], dtype=np.int64)
@@ -13,7 +12,6 @@ def test_labeled_windows_use_final_transaction_label():
     assert np.array_equal(labels, np.array([0, 1, 1]))
     assert np.array_equal(windows[0], X[:3])
     assert np.array_equal(windows[2], X[2:5])
-
 
 def test_windows_can_be_built_without_crossing_partitions():
     X = np.arange(40, dtype=np.float32).reshape(10, 4)
@@ -26,7 +24,6 @@ def test_windows_can_be_built_without_crossing_partitions():
     assert np.max(first_x) < np.min(second_x)
     assert first_y[-1] == y[5]
     assert second_y[0] == y[8]
-
 
 def test_chronological_split_preserves_order():
     df = pd.DataFrame(
@@ -47,13 +44,12 @@ def test_chronological_split_preserves_order():
     assert list(splits.validation["Time"]) == [4]
     assert list(splits.test["Time"]) == [5]
 
-
 def test_chronological_split_uses_expected_fractions():
     df = pd.DataFrame(
         {
-            "Time": np.arange(10),
-            "Class": np.zeros(10, dtype=np.int64),
-            "V1": np.arange(10, dtype=np.float32),
+            "Time": np.arange(100),
+            "Class": np.zeros(100, dtype=np.int64),
+            "V1": np.arange(100, dtype=np.float32),
         }
     )
 
@@ -63,6 +59,6 @@ def test_chronological_split_uses_expected_fractions():
         validation_fraction=0.1,
     )
 
-    assert len(splits.train) == 7
-    assert len(splits.validation) == 1
-    assert len(splits.test) == 2
+    assert len(splits.train) == 70
+    assert len(splits.validation) == 10
+    assert len(splits.test) == 20
