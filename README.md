@@ -109,7 +109,8 @@ The training settings retain choices of 50 epochs, batch size 128, Adam at 0.001
 
 ## Data
 
-The project uses the Kaggle Credit Card Fraud Detection dataset. Min-Max normalization and SMOTE and reports an 80/20 experiment split.
+The project uses the Kaggle Credit Card Fraud Detection dataset. The paper-aligned experiment uses Min-Max normalization and SMOTE with
+an 80/20 train/test split.
 
 - Source: https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
 - File name: `creditcard.csv`
@@ -130,36 +131,24 @@ Download the dataset and place it at `data/creditcard.csv`.
 
 ```text
 sort transactions by Time
-          ↓
+    ↓
 70% train | 10% validation | 20% test
-          ↓
+    ↓
 fit Min-Max scaler on training partition
-          ↓
+    ↓
 transform validation/test using training scaler
-          ↓
+    ↓
 build 8-step windows independently
-          ↓
+    ↓
 apply BorderlineSMOTE to training partition
-          ↓
+    ↓
 train spatial-temporal Transformer
-          ↓
+    ↓
 contrastive + classification optimization
-          ↓
+    ↓
 select checkpoint using validation F1
-          ↓
+    ↓
 evaluate on held-out test partition
-
-sort by Time
-    ↓
-70% train | 10% validation | 20% test
-    ↓
-fit Min-Max on train only
-    ↓
-transform validation/test with train scaler
-    ↓
-build 8-step windows independently in each partition
-    ↓
-class-weighted supervised loss
 ```
 
 Install the required dependencies:
@@ -214,21 +203,21 @@ Training writes outputs/best_model.pt and outputs/training_summary.json. Evaluat
 
 ## Results
 
-See [`results/README.md`](results/README.md) for the test run, structured metrics, training log, and reproduction details.
+See [`results/README.md`](results/README.md) and [`results/original_run/`](results/original_run/) for the experiment test run, structured metrics, training log, and reproduction details.
 
 The configuration uses:
 
-8-transaction windows
-30 input features
-3 stacked spatial-temporal Transformer blocks
-4 attention heads
-embedding width 128
-batch size 128
-Adam optimizer
-learning rate 0.001
-InfoNCE temperature $\tau=0.07$
-$\lambda=0.5$
-maximum of 50 training epochs with early stopping
+- 8-transaction windows
+- 30 input features
+- 3 stacked spatial-temporal Transformer blocks
+- 4 attention heads
+- embedding width 128
+- batch size 128
+- Adam optimizer
+- learning rate 0.001
+- InfoNCE temperature $\tau=0.07$
+- $\lambda=0.5$
+- maximum of 50 training epochs with early stopping
 
 The recorded run reports 859,458 trainable parameters and completion with early stopping at epoch 42. Reported statistical performance of 99.18% ± 0.08% accuracy, 99.08% ± 0.11% precision, 98.92% ± 0.08% recall, 98.96% ± 0.06% F1-score, and 98.24% ± 0.40% specificity.
 
