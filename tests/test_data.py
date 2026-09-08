@@ -29,10 +29,40 @@ def test_windows_can_be_built_without_crossing_partitions():
 
 
 def test_chronological_split_preserves_order():
-    df = pd.DataFrame({"Time": [4, 1, 3, 2, 5], "Class": [0, 1, 0, 1, 0], "V1": [0, 1, 2, 3, 4]})
+    df = pd.DataFrame(
+        {
+            "Time": [4, 1, 3, 2, 5],
+            "Class": [0, 1, 0, 1, 0],
+            "V1": [0, 1, 2, 3, 4],
+        }
+    )
     df = df.sort_values("Time").reset_index(drop=True)
-    splits = chronological_split(df, train_fraction=0.6, validation_fraction=0.2)
+    splits = chronological_split(
+        df,
+        train_fraction=0.6,
+        validation_fraction=0.2,
+    )
 
     assert list(splits.train["Time"]) == [1, 2, 3]
     assert list(splits.validation["Time"]) == [4]
     assert list(splits.test["Time"]) == [5]
+
+
+def test_chronological_split_uses_expected_fractions():
+    df = pd.DataFrame(
+        {
+            "Time": np.arange(10),
+            "Class": np.zeros(10, dtype=np.int64),
+            "V1": np.arange(10, dtype=np.float32),
+        }
+    )
+
+    splits = chronological_split(
+        df,
+        train_fraction=0.7,
+        validation_fraction=0.1,
+    )
+
+    assert len(splits.train) == 7
+    assert len(splits.validation) == 1
+    assert len(splits.test) == 2
