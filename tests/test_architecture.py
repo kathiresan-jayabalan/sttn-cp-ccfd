@@ -5,7 +5,12 @@ from src.architecture import STTNCP, SpatialTransformerBlock, infonce_loss
 
 
 def test_spatial_attention_uses_original_feature_count():
-    layer = SpatialTransformerBlock(input_dim=5, embed_dim=8, n_heads=2, mlp_dim=16)
+    layer = SpatialTransformerBlock(
+        input_dim=5,
+        embed_dim=8,
+        n_heads=2,
+        mlp_dim=16,
+    )
     seen = {}
 
     def hook(module, inputs, output):
@@ -23,9 +28,17 @@ def test_spatial_attention_uses_original_feature_count():
 
 
 def test_model_classifies_complete_windows():
-    model = STTNCP(input_dim=5, seq_len=4, embed_dim=8, n_blocks=1, n_heads=2, mlp_dim=16)
+    model = STTNCP(
+        input_dim=5,
+        seq_len=4,
+        embed_dim=8,
+        n_blocks=1,
+        n_heads=2,
+        mlp_dim=16,
+    )
     x = torch.randn(3, 4, 5)
     logits = model(x)
+
     assert logits.shape == (3, 2)
 
     with pytest.raises(ValueError, match=r"shape \(B, T, D\)"):
@@ -35,3 +48,29 @@ def test_model_classifies_complete_windows():
 def test_infonce_requires_multiple_samples():
     with pytest.raises(ValueError, match="at least two"):
         infonce_loss(torch.randn(1, 4), torch.randn(1, 4))
+
+
+def test_infonce_returns_finite_scalar():
+    z1 = torch.randn(4, 8)
+    z2 = torch.randn(4, 8)
+
+    loss = infonce_loss(z1, z2)
+
+    assert loss.ndim == 0
+    assert torch.isfinite(loss)
+    assert loss.item() >= 0
+
+
+def test_model_supports_multiple_st_blocks():
+    model = STTNCP(
+        input_dim=5,
+        seq_len=4,
+        embed_dim=8,
+        n_blocks=3,
+        n_heads=2,
+        mlp_dim=16,
+    )
+    x = torch.randn(2, 4, 5)
+    logits = model(x)
+
+    assert logits.shape == (2, 2)
