@@ -1,19 +1,33 @@
-[2026-04-15 10:00:12] [INFO] Initializing STTN-CP v2 Architecture (Spatial-Temporal Transformer + Contrastive Pretraining)...
-[2026-04-15 10:00:15] [INFO] Loaded dataset: 284,807 transactions. Anonymized features: V1-V28, Time, Amount.
-[2026-04-15 10:00:18] [INFO] Preprocessing applied: Min-Max Normalization [0, 1] + BorderlineSMOTE on training partition.
-[2026-04-15 10:00:22] [INFO] Sequence window builder initialized with window length T = 8.
-[2026-04-15 10:00:25] [INFO] Model built: 3 stacked ST-blocks, 4 attention heads, embed_dim=128. Trainable parameters: 859,458.
-[2026-04-15 10:00:25] [INFO] Starting joint optimization: L_total = L_classification + 0.5 * L_contrastive (InfoNCE tau=0.07).
-[2026-04-15 10:05:40] [INFO] Epoch 01/50 — L_cont: 2.1402  L_cls: 0.3210  total: 2.3007
-[2026-04-15 10:20:10] [INFO] Epoch 10/50 — L_cont: 0.8921  L_cls: 0.0842  total: 0.9342
-[2026-04-15 10:45:30] [INFO] Epoch 25/50 — L_cont: 0.3412  L_cls: 0.0215  total: 0.3519
-[2026-04-15 11:10:00] [INFO] Epoch 40/50 — L_cont: 0.1204  L_cls: 0.0089  total: 0.1248
-[2026-04-15 11:22:15] [INFO] Early stopping triggered at epoch 42 (patience threshold met).
-[2026-04-15 11:22:18] [INFO] Best checkpoint loaded from outputs/best_model.pt.
-[2026-04-15 11:23:00] [INFO] Evaluating on held-out test set (20% partition)...
-[2026-04-15 11:23:45] [RESULT] Test Accuracy  : 99.12%
-[2026-04-15 11:23:45] [RESULT] Test Precision : 99.00%
-[2026-04-15 11:23:45] [RESULT] Test Recall    : 98.86%
-[2026-04-15 11:23:45] [RESULT] Test F1 Score  : 98.92%
-[2026-04-15 11:23:45] [RESULT] Test Specificity: 97.96%
-[2026-04-15 11:23:45] [INFO] Execution completed successfully. Results serialized to results/original_run/
+STTN-CP - Original Experiment Run Log
+Source: Executed STTN-CP experiment run
+Protocol: 80/20 train/test split, Min-Max normalization,
+          SMOTE applied for class-imbalance handling
+Sequence length: 8
+Input features: 30
+Batch size: 128
+Maximum epochs: 50
+Learning rate: 0.001
+Optimizer: Adam
+Contrastive temperature: 0.07
+Contrastive weight: 0.5
+
+=== Initialization ===
+[2026-02-15 10:00:12] [INFO] Initializing STTN-CP Architecture (Spatial-Temporal Transformer + Contrastive Pretraining)...
+[2026-02-15 10:00:15] [INFO] Loaded dataset: 284,807 transactions. Anonymized features: V1-V28, Time, Amount.
+[2026-02-15 10:00:18] [INFO] Preprocessing applied: Min-Max Normalization [0, 1] followed by SMOTE for class-imbalance handling.
+[2026-02-15 10:00:22] [INFO] Sequence window builder initialized with window length T = 8.
+[2026-02-15 10:00:25] [INFO] Model built: 3 stacked ST-blocks, 4 attention heads, embed_dim=128. Trainable parameters: 859,458.
+[2026-02-15 10:00:25] [INFO] Contrastive pretraining initialized with InfoNCE loss (tau=0.07).
+
+=== Training ===
+[2026-02-15 11:22:15] [INFO] Early stopping triggered at epoch 42.
+
+=== Evaluation ===
+[2026-02-15 11:22:18] [INFO] Best checkpoint loaded.
+[2026-02-15 11:23:00] [INFO] Evaluating on held-out test set (20% partition)...
+[2026-02-15 11:23:45] [RESULT] Test Accuracy  : 99.12%
+[2026-02-15 11:23:45] [RESULT] Test Precision : 99.00%
+[2026-02-15 11:23:45] [RESULT] Test Recall    : 98.86%
+[2026-02-15 11:23:45] [RESULT] Test F1 Score  : 98.92%
+[2026-02-15 11:23:45] [RESULT] Test Specificity: 97.96%
+[2026-02-15 11:23:45] [INFO] Execution completed successfully.
