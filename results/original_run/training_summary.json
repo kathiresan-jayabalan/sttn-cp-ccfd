@@ -14,8 +14,7 @@
     "learning_rate": 0.001,
     "temperature_tau": 0.07,
     "lambda_contrastive": 0.5,
-    "optimizer": "Adam",
-    "scheduler": "CosineAnnealingLR"
+    "optimizer": "Adam"
   },
   "statistical_performance_mean_std": {
     "accuracy": "99.18 ± 0.08%",
