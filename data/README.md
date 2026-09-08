@@ -1,13 +1,14 @@
 # Data
 
-The experiment uses the ULB / Machine Learning Group credit card fraud dataset available through Kaggle.
+This project uses the Kaggle Credit Card Fraud Detection dataset.
 
-Download `creditcard.csv` and place it at:
+- Source: https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
+- File name: `creditcard.csv`
+- Target column: `Class`
+- Time column: `Time`
+- Rows: 284,807
+- Fraud rows: 492
 
-```text
-data/creditcard.csv
-```
-
-The repository does not redistribute the dataset.
-
-The training pipeline sorts by `Time`, creates chronological 70/10/20 partitions, fits Min-Max scaling on the training partition, and creates transaction windows independently within each partition.
+Download the file from Kaggle and save it as `./data/creditcard.csv`. 
+The file is not included in this repository. 
+The training script sorts records by `Time` before creating any split.
