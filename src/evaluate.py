@@ -14,7 +14,6 @@ from .architecture import STTNCP
 from .data import build_labeled_windows, chronological_split, load_creditcard
 from .train import predict_and_score
 
-
 def _restore_scaler(checkpoint: dict, feature_count: int) -> MinMaxScaler:
     data_min = np.asarray(checkpoint["scaler_min"], dtype=np.float64)
     data_max = np.asarray(checkpoint["scaler_max"], dtype=np.float64)
@@ -30,7 +29,6 @@ def _restore_scaler(checkpoint: dict, feature_count: int) -> MinMaxScaler:
     scaler.data_range_ = data_range
     scaler.n_features_in_ = feature_count
     return scaler
-
 
 def main() -> None:
     parser = argparse.ArgumentParser()
@@ -69,7 +67,6 @@ def main() -> None:
     metrics = predict_and_score(model, loader, torch.device("cpu"))
     Path(args.output).write_text(json.dumps(metrics, indent=2), encoding="utf-8")
     print(json.dumps(metrics, indent=2))
-
 
 if __name__ == "__main__":
     main()
