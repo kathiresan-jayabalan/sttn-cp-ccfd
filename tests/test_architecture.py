@@ -1,8 +1,7 @@
-import torch
 import pytest
+import torch
 
 from src.architecture import STTNCP, SpatialTransformerBlock, infonce_loss
-
 
 def test_spatial_attention_uses_original_feature_count():
     layer = SpatialTransformerBlock(
@@ -59,7 +58,6 @@ def test_infonce_returns_finite_scalar():
     assert loss.ndim == 0
     assert torch.isfinite(loss)
     assert loss.item() >= 0
-
 
 def test_model_supports_multiple_st_blocks():
     model = STTNCP(
