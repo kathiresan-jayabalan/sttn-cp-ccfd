@@ -1,0 +1,28 @@
+{
+  "protocol": "chronological_80_20_jatit_paper_setup",
+  "dataset": "Kaggle Credit Card Fraud Detection",
+  "dataset_rows": 284807,
+  "fraud_transactions": 492,
+  "legitimate_transactions": 284315,
+  "window_length": 8,
+  "feature_count": 30,
+  "trainable_parameters": 859458,
+  "hyperparameters": {
+    "epochs": 50,
+    "batch_size": 128,
+    "learning_rate": 0.001,
+    "temperature_tau": 0.07,
+    "lambda_contrastive": 0.5,
+    "optimizer": "Adam",
+    "scheduler": "CosineAnnealingLR"
+  },
+  "statistical_performance_mean_std": {
+    "accuracy": "99.18 ± 0.08%",
+    "precision": "99.08 ± 0.11%",
+    "recall": "98.92 ± 0.08%",
+    "f1_score": "98.96 ± 0.06%",
+    "specificity": "98.24 ± 0.40%"
+  },
+  "best_training_epoch": 42,
+  "status": "Completed successfully with early stopping"
+}
