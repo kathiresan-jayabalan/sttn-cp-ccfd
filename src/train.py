@@ -23,7 +23,6 @@ from .data import (
     scale_splits,
 )
 
-
 DEFAULTS = dict(
     seq_len=8,
     embed_dim=128,
@@ -40,7 +39,6 @@ DEFAULTS = dict(
     noise_std=0.02,
 )
 
-
 def seed_everything(seed: int) -> None:
     random.seed(seed)
     np.random.seed(seed)
@@ -48,10 +46,8 @@ def seed_everything(seed: int) -> None:
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
-
 def augment(batch: torch.Tensor, noise_std: float) -> torch.Tensor:
     return batch + torch.randn_like(batch) * noise_std
-
 
 def evaluate_loss(model: STTNCP, loader, criterion, device) -> float:
     model.eval()
@@ -244,7 +240,6 @@ def predict_and_score(model: STTNCP, loader, device) -> Dict[str, object]:
         "confusion_matrix": cm.tolist(),
     }
 
-
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data-path", required=True)
@@ -253,7 +248,6 @@ def parse_args() -> argparse.Namespace:
     for name, value in DEFAULTS.items():
         parser.add_argument(f"--{name.replace('_', '-')}", type=type(value), default=value)
     return parser.parse_args()
-
 
 if __name__ == "__main__":
     result = train(parse_args())
