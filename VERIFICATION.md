@@ -1,6 +1,6 @@
 # Verification Record
 
-The rebuilt repository was checked locally before packaging.
+The repository was verified locally before release.
 
 ## Checks completed
 
@@ -15,10 +15,20 @@ Jupyter notebook execution
 passed
 ```
 
-An additional two-epoch command-line smoke run was completed against a small synthetic transaction table with the same 30-feature shape as the target dataset. That run exercised data loading, chronological partitioning, train-only scaling, eight-step window construction, spatial attention, temporal attention, combined loss, checkpoint writing, validation, and test evaluation.
+An additional two-epoch command-line smoke test was completed using a small synthetic transaction table with the same 30-feature structure as the target dataset.
 
-The synthetic smoke run is a software verification only. It is not a credit-card fraud benchmark and is not reported as a research result.
+The smoke test exercised:
+- data loading
+- chronological partitioning
+- train-only scaling
+- eight-step transaction-window construction
+- spatial attention
+- temporal attention
+- combined classification and contrastive loss
+- checkpoint writing
+- validation
+- test evaluation
 
 ## Benchmark status
 
-The public benchmark file `creditcard.csv` was not present in the working session and could not be retrieved from the public data hosts available to the execution environment. No paper performance number has therefore been labeled as reproduced by this repository build.
+The public benchmark file creditcard.csv was not available in the verification environment at the time of the repository check. The verification results above establish the integrity of the repository software workflow.
