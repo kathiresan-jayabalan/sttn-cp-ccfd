@@ -6,7 +6,7 @@ STTN-CP is a Spatial-Temporal Transformer Network with Contrastive Pretraining f
 
 ## Originality & Novelty
 
-The published work proposes STTN-CP as a unified framework that integrates spatial-temporal Transformer modeling with contrastive pretraining for credit card fraud detection. The model is designed to capture both spatial correlations among transaction features and temporal dependencies across transaction sequences while improving the discriminative quality of learned representations. The study also emphasizes imbalance-aware evaluation using accuracy, precision, recall, F1-score, and specificity.
+STTN-CP is a unified framework that integrates spatial-temporal Transformer modeling with contrastive pretraining for credit card fraud detection. The model is designed to capture both spatial correlations among transaction features and temporal dependencies across transaction sequences while improving the discriminative quality of learned representations. The evaluation uses accuracy, precision, recall, F1-score, and specificity to assess fraud detection performance.
 
 The architecture uses stacked spatial-temporal Transformer blocks, followed by contrastive representation learning and binary classification. The implementation combines spatial-temporal Transformer modeling with contrastive representation learning as the central design of STTN-CP for credit card fraud detection.
 
