@@ -27,7 +27,7 @@ After the stacked spatial-temporal blocks, the resulting high-level embeddings a
 The repository implementation uses 8-step transaction windows for its configurable sequence input and 30 transaction features for the Kaggle dataset.
 
 ```
-transaction sequence (A, T, d_f)
+input tensor (A, T, d_f)
             │
      input embedding
             │
@@ -51,7 +51,7 @@ transaction sequence (A, T, d_f)
     │   residual     │
     └───────┬────────┘
             │
-          ⋮
+           ⋮
             │
     ┌───────▼────────┐
     │   ST Block L   │
@@ -64,7 +64,7 @@ transaction sequence (A, T, d_f)
             │
    contrastive pretraining
             │
-   pretrained embedding
+      learned embedding
             │
      fully connected
      classification head
