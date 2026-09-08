@@ -6,10 +6,7 @@
 - Added input embedding and positional encoding for transaction sequence representations.
 - Added contrastive representation learning using an InfoNCE objective with temperature $\tau = 0.07$.
 - Added a fully connected binary classification head with sigmoid activation for legitimate and fraudulent transaction classification.
-- Added the combined training objective:
-  $$
-  L_{\mathrm{total}} = L_{\mathrm{classification}} + \lambda L_{\mathrm{contrastive}}
-  $$
+- Added the combined training objective.
 - Added support for the Kaggle Credit Card Fraud Detection dataset with 30 input features (`Time`, `V1`-`V28`, and `Amount`) and `Class` as the target label.
 - Added Min-Max normalization and class-imbalance handling through the repository training workflow.
 - Added configurable fixed-length transaction windows, with an 8-step sequence configuration used by the reference implementation.
