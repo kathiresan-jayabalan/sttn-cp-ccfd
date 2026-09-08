@@ -71,10 +71,13 @@ transaction window (B, T=8, D=30)
 - **Representation Aggregation:** Mean pooling across the $T$ timesteps produces a fixed-size sequence representation.
 - **Contrastive Projection Head:** Maps the aggregated representation into the contrastive embedding space for InfoNCE learning between augmented views.
 - **Classifier Head:** Produces binary fraud logits for legitimate and fraudulent transactions.
-- **Combined Objective:** The training objective combines supervised classification and contrastive representation learning:
+- **Combined Objective:** The overall training objective combines the supervised classification loss with the contrastive loss:
+
 $$
 L = L_{\mathrm{class}} + \lambda L_{\mathrm{contrastive}}
 $$
+
+where $\lambda$ controls the contribution of the contrastive objective.
 
 ## Model Hyperparameters
 
