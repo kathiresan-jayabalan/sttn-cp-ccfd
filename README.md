@@ -18,7 +18,7 @@ $$
 M_l^{sp} \in \mathbb{R}^{A \times T \times d_f}
 $$
 
-where $A$ denotes the batch dimension, $T$ is the number of transaction time steps, and $d_f$ is the number of transaction features. The dataset used in the study contains 30 transaction attributes: `V1`–`V28`, `Time`, and `Amount`, with `Class` used as the target label.
+where $A$ denotes the batch dimension, $T$ is the number of transaction time steps, and $d_f$ is the number of transaction features. The dataset used in the study contains 30 transaction attributes: `V1`-`V28`, `Time`, and `Amount`, with `Class` used as the target label.
 
 Each spatial-temporal block applies the **Spatial Transformer** and **Temporal Transformer** in sequence. The Spatial Transformer captures inter-feature dependencies across transaction attributes. Its output is combined with the block input through a residual connection. The resulting representation is then processed by the Temporal Transformer to capture dependencies across consecutive transactions, followed by a second residual connection.
 
