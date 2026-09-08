@@ -1,5 +1,5 @@
 {
-  "protocol": "chronological_80_20_jatit_paper_setup",
+  "protocol": "original_experiment_configuration",
   "dataset": "Kaggle Credit Card Fraud Detection",
   "dataset_rows": 284807,
   "fraud_transactions": 492,
@@ -8,6 +8,7 @@
   "feature_count": 30,
   "trainable_parameters": 859458,
   "hyperparameters": {
+    "train_test_split": "80/20",
     "epochs": 50,
     "batch_size": 128,
     "learning_rate": 0.001,
