@@ -1,9 +1,8 @@
-"""STTN-CP model components.
+"""STTN-CP model components
 
-The implementation follows the spatial -> residual -> temporal -> residual
-flow described in the STTN-CP paper. Spatial attention receives the original
-transaction feature vector at each timestep; temporal attention operates on
-the embedded sequence.
+The implementation follows a sequential spatial -> residual -> temporal -> residual flow.
+Spatial attention receives the original transaction features at each timestep.
+Temporal attention operates on the embedded transaction sequence.
 """
 
 from __future__ import annotations
@@ -78,13 +77,6 @@ class SpatialTransformerBlock(nn.Module):
         self.norm = nn.LayerNorm(embed_dim)
 
     def forward(self, x: Tensor) -> Tensor:
-        """Return a per-timestep spatial representation.
-
-        Parameters
-        ----------
-        x:
-            Tensor shaped ``(batch, timesteps, input_dim)``.
-        """
         if x.ndim != 3:
             raise ValueError("spatial input must have shape (B, T, D)")
         if x.size(-1) != self.input_dim:
@@ -114,6 +106,7 @@ class TemporalTransformerBlock(nn.Module):
         super().__init__()
         if embed_dim % n_heads != 0:
             raise ValueError("embed_dim must be divisible by n_heads")
+
         self.positional = PositionalEncoding(embed_dim, max_len=seq_len)
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=embed_dim,
@@ -202,6 +195,7 @@ class STTNCP(nn.Module):
             "num_classes": num_classes,
             "dropout": dropout,
         }
+
         self.input_embed = nn.Linear(input_dim, embed_dim)
         self.temporal_positional = PositionalEncoding(embed_dim, max_len=seq_len)
         self.st_blocks = nn.ModuleList(
@@ -251,13 +245,17 @@ class STTNCP(nn.Module):
         return self.projector(z)
 
     def forward(self, x: Tensor) -> Tensor:
-        """Return class logits for a complete transaction window."""
+        """Return legitimate/fraud logits for a complete transaction window."""
         z = self.forward_backbone(x)
         return self.classifier(z)
 
 
-def infonce_loss(z1: Tensor, z2: Tensor, temperature: float = 0.07) -> Tensor:
-    """Symmetric InfoNCE loss with cosine similarity."""
+def infonce_loss(
+    z1: Tensor,
+    z2: Tensor,
+    temperature: float = 0.07,
+) -> Tensor:
+    """Symmetric InfoNCE loss using cosine-normalized representations."""
     if z1.ndim != 2 or z2.ndim != 2:
         raise ValueError("contrastive representations must be 2-D")
     if z1.shape != z2.shape:
@@ -289,16 +287,12 @@ def combined_loss(
     lambda_contrastive: float = 0.5,
     temperature: float = 0.07,
 ) -> Tuple[Tensor, Tensor, Tensor]:
-    """Return paper-form objective: classification + lambda * contrastive."""
+    """Return the combined objective: classification + lambda * contrastive."""
     loss_class = class_loss(logits, labels)
     loss_contrastive = infonce_loss(z1, z2, temperature=temperature)
     loss_total = loss_class + lambda_contrastive * loss_contrastive
     return loss_total, loss_class, loss_contrastive
 
 
-# Backward-compatible name used in the earlier v2 draft.
-STTNContrastivePretraining = STTNCP
-
-
 def count_trainable_parameters(model: nn.Module) -> int:
-    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+    return sum(parameter.numel() for parameter in model.parameters() if parameter.requires_grad)
