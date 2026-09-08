@@ -1,5 +1,5 @@
 {
-  "description": "Testing performance from the original STTN-CP experiment.",
+  "description": "Testing performance from the original STTN-CP experiment",
   "accuracy": 0.9912,
   "precision": 0.9900,
   "recall": 0.9886,
