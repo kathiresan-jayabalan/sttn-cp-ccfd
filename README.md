@@ -255,13 +255,10 @@ The repositories below address the same credit-card-fraud-detection problem from
 **Paper:** STTN-CP: A Spatial-Temporal Transformer with Contrastive Pretraining Model for Credit Card Fraud Detection
 **Authors:** Kathiresan Jayabalan, Sethuraman Radhakrishnan  
 **Journal:** Journal of Theoretical and Applied Information Technology, Vol. 104, No. 7, 15 April 2026, pp. 305–324  
-**Paper DOI:** `10.5281/zenodo.19593993`
+**Paper DOI:** [DOI/10.5281/zenodo.19593993](https://doi.org/10.5281/zenodo.19593993)
 
 ## Software Release
 
 STTN-CP-CCFD v1.0.0
-**Software DOI:** `10.5281/zenodo.22662841`
 
-## Citation
-
-See [`CITATION.cff`](CITATION.cff) for software and publication citation metadata.
+**Software DOI:** [DOI/10.5281/zenodo.22662841](https://doi.org/10.5281/zenodo.22662841)
