@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22662841.svg)](https://doi.org/10.5281/zenodo.22662841)
+
 # STTN-CP for Credit Card Fraud Detection
 
 STTN-CP is a Spatial-Temporal Transformer Network with Contrastive Pretraining for credit card fraud detection. The implementation models relationships among transaction features with spatial self-attention and sequential dependencies across transaction windows with temporal self-attention.
