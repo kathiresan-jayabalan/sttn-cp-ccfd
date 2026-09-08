@@ -13,13 +13,11 @@ import torch
 from torch import Tensor
 from torch.utils.data import DataLoader, TensorDataset
 
-
 @dataclass(frozen=True)
 class DataSplits:
     train: pd.DataFrame
     validation: pd.DataFrame
     test: pd.DataFrame
-
 
 def load_creditcard(path: str | Path) -> pd.DataFrame:
     path = Path(path)
