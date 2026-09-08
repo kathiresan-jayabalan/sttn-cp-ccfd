@@ -72,15 +72,13 @@ The sequential block structure is spatial attention → residual addition → te
 - **Contrastive Projection Head:** Projects the aggregated representation into the contrastive space for InfoNCE learning between augmented views.
 - **Classifier Head:** Produces two class logits for legitimate and fraudulent transactions.
 - **Combined Objective:**
-
-$$
+```math
 L_{\mathrm{total}}
 =
 L_{\mathrm{classification}}
 +
 \lambda L_{\mathrm{contrastive}}
-$$
-
+```
 where `λ` controls the contribution of the contrastive objective.
 
 ## Model Configuration
