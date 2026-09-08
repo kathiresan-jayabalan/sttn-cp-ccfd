@@ -14,7 +14,6 @@ import torch
 from torch import Tensor, nn
 import torch.nn.functional as F
 
-
 class PositionalEncoding(nn.Module):
     """Sinusoidal positional encoding for a token sequence."""
 
